@@ -38,17 +38,44 @@
 <div class="container-fluid">
     {% if grade > 80 %}
     <div class="alert alert-success">
-       <!--HINT Display passed info -->
+       <b>Congratulations, {{ user.first_name|default:user.username }}!</b>
+       You have passed the exam of {{ course.name }} with score {{ grade }}/100
+       ({{ total_score }} of {{ possible_score }} points).
     </div>
         {% else %}
         <div class="alert alert-danger">
-            <!--HINT Display failed info -->
+            <b>Failed.</b> Sorry, {{ user.first_name|default:user.username }}, you have not passed the exam of
+            {{ course.name }}. Your score is {{ grade }}/100 ({{ total_score }} of {{ possible_score }} points).
         </div>
         <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
         {% endif %}
         <div class="card-columns-vertical mt-1">
         <h5 class="">Exam results</h5>
-            <!--HINT Display exam results-->
+            {% for result in results %}
+                <div class="card mt-2">
+                    <div class="card-header">
+                        <b>{{ result.question.question_text }}</b>
+                        {% if result.passed %}
+                            <span class="badge badge-success">Correct: {{ result.question.grade }}/{{ result.question.grade }}</span>
+                        {% else %}
+                            <span class="badge badge-danger">Wrong: 0/{{ result.question.grade }}</span>
+                        {% endif %}
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for choice in result.choices %}
+                            {% if choice.id in selected_ids and choice.is_correct %}
+                                <li class="list-group-item list-group-item-success">{{ choice.choice_text }} (your answer, correct)</li>
+                            {% elif choice.id in selected_ids %}
+                                <li class="list-group-item list-group-item-danger">{{ choice.choice_text }} (your answer, wrong)</li>
+                            {% elif choice.is_correct %}
+                                <li class="list-group-item list-group-item-warning">{{ choice.choice_text }} (correct answer, not selected)</li>
+                            {% else %}
+                                <li class="list-group-item">{{ choice.choice_text }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
         </div>
     </div>
 </body>
